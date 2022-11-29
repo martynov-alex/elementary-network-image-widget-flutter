@@ -23,23 +23,13 @@ class NetworkImageWidget extends ElementaryWidget<INetworkImageWm> {
                 wm.testUrl,
                 headers: headers ?? wm.headers,
                 errorBuilder: (_, Object e, ___) {
-                  wm.onError(e);
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    wm.onError(e);
+                  });
                   return const Text('Update token...');
                 },
               )
             : const CircularProgressIndicator();
-        // return Visibility(
-        //   visible: isVisible,
-        //   replacement: const CircularProgressIndicator(),
-        //   child: Image.network(
-        //     wm.testUrl,
-        //     headers: headers ?? wm.headers,
-        //     errorBuilder: (_, Object e, ___) {
-        //       wm.onError(e);
-        //       return const Text('Update token...');
-        //     },
-        //   ),
-        // );
       },
     );
   }
