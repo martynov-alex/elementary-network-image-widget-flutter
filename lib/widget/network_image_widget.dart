@@ -20,13 +20,19 @@ class NetworkImageWidget extends ElementaryWidget<INetworkImageWm> {
       builder: (_, isVisible, __) {
         return isVisible
             ? Image.network(
-                wm.testUrl,
+                url,
                 headers: headers ?? wm.headers,
                 errorBuilder: (_, Object e, ___) {
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    wm.onError(e);
-                  });
-                  return const Text('Update token...');
+                  if (wm.isFirstError) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      wm.onError(e);
+                    });
+                    return const Text('Обновление токена...');
+                  }
+                  return const Text(
+                    'Ошибка.\nПопробуйте еще раз позже.',
+                    textAlign: TextAlign.center,
+                  );
                 },
               )
             : const CircularProgressIndicator();

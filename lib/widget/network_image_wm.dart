@@ -1,13 +1,18 @@
-import 'dart:io';
-
 import 'package:elementary/elementary.dart';
 import 'package:elementary_network_image_widget_flutter/widget/network_image_widget.dart';
 import 'package:flutter/material.dart';
 
 abstract class INetworkImageWm extends IWidgetModel {
+  /// Показывать ли виджет с картинкой.
   ValueNotifier<bool> get isVisible;
+
+  /// Заголовки для передачи в Image виджет.
   Map<String, String> get headers;
-  String get testUrl;
+
+  /// Проверка на циклическую ошибку.
+  bool get isFirstError;
+
+  /// Коллбэк, который вызывается при ошибке.
   void onError(Object e);
 }
 
@@ -20,11 +25,11 @@ class NetworkImageWm extends WidgetModel<NetworkImageWidget, NetworkImageModel>
   Map<String, String> get headers => _headers;
 
   @override
-  String get testUrl => _testUrl;
+  bool get isFirstError => _isFirstError;
 
   final _isVisible = ValueNotifier(false);
   final _headers = <String, String>{};
-  String _testUrl = 'https://i.ibb.co/jgkB4ZN1/Elementary-Logo.png';
+  bool _isFirstError = true;
 
   NetworkImageWm(NetworkImageModel model) : super(model);
 
@@ -37,9 +42,10 @@ class NetworkImageWm extends WidgetModel<NetworkImageWidget, NetworkImageModel>
   @override
   void onError(Object e) {
     if (e is NetworkImageLoadException) {
-      debugPrint('Status code ${e.statusCode}');
+      debugPrint('Loading error. Status code ${e.statusCode}');
       _refreshToken();
     }
+    _isFirstError = false;
   }
 
   @override
@@ -56,16 +62,17 @@ class NetworkImageWm extends WidgetModel<NetworkImageWidget, NetworkImageModel>
     // Get and set headers
     await Future.delayed(const Duration(seconds: 1));
     debugPrint('Load headers');
+
     _isVisible.value = true;
   }
 
   Future<void> _refreshToken() async {
     _isVisible.value = false;
+
     // Refresh token
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 3));
     debugPrint('Refresh token');
 
-    _testUrl = 'https://i.ibb.co/jgkB4ZN/Elementary-Logo.png';
     _isVisible.value = true;
   }
 }
