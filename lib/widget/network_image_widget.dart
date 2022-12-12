@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:elementary/elementary.dart';
 import 'package:elementary_network_image_widget_flutter/widget/network_image_wm.dart';
 import 'package:flutter/material.dart';
@@ -19,13 +20,14 @@ class NetworkImageWidget extends ElementaryWidget<INetworkImageWm> {
       valueListenable: wm.isVisible,
       builder: (_, isVisible, __) {
         return isVisible
-            ? Image.network(
-                url,
-                headers: headers ?? wm.headers,
-                errorBuilder: (_, Object e, ___) {
+            ? CachedNetworkImage(
+                imageUrl: url,
+                httpHeaders: headers ?? wm.headers,
+                placeholder: (_, __) => const _Loader(),
+                errorWidget: (_, __, error) {
                   if (wm.isFirstError) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      wm.onError(e);
+                      wm.onError(error);
                     });
                     return const Text('Обновление токена...');
                   }
@@ -35,8 +37,23 @@ class NetworkImageWidget extends ElementaryWidget<INetworkImageWm> {
                   );
                 },
               )
-            : const CircularProgressIndicator();
+            : const _Loader();
       },
+    );
+  }
+}
+
+/// Виджет лоадера при загрузке фотографии и при обновлении токенов.
+class _Loader extends StatelessWidget {
+  const _Loader({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: CircularProgressIndicator(
+        color: Colors.amberAccent,
+        strokeWidth: 2,
+      ),
     );
   }
 }
